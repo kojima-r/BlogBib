@@ -44,6 +44,10 @@ var blogbib = new BlogBib({ amazon_account: "xxxxx",cover_mode: "amazon", width_
 * Amazon と OpenBD 以外のサービスの利用
 * 細かいデザインの変更
 
+## 開発環境+言語
+
+Visual studio 2015 for Web + Type Script 1.7
+
 ## ライセンス
 
 All code licensed under the [MIT License](http://www.opensource.org/licenses/mit-license.php).
