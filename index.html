@@ -2,14 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>TypeScript HTML App</title>
-    <link rel="stylesheet" href="app.css" type="text/css" />
+    <title>Sample (blogbib.js)</title>
+    <style>
+        #content{
+            width:600px;
+        }
+        .blogbib {
+            border-style:solid;
+            border-width:2px;
+            width:600px;
+            display:inline-block;
+            background-color:#f0f0f0;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="app.js"></script>
+    <script src="blogbib.js"></script>
+    <script>
+        //var blogbib = new BlogBib({ amazon_account: "xxxxx",cover_mode: "amazon", width_cover: 170, width: 600});
+    </script>
 </head>
 <body>
-    <h1>TypeScript HTML App</h1>
+    <h1>Sample (blogbib.js)</h1>
 
-    <div id="content"></div>
+    <div id="content">
+        <p>blogbib.createLink("4103503610");</p>
+            <script>blogbib.createLink("4103503610");</script>
+        <p>blogbib.createLink("9784062199544");</p>
+            <script>blogbib.createLink("9784062199544");</script>
+        <p>blogbib.createLink("4048922939");</p>
+            <script>blogbib.createLink("4048922939");</script>
+</div>
+
 </body>
 </html>
