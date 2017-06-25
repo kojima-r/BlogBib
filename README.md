@@ -3,8 +3,12 @@
 書誌情報・書影をブログ等でいい感じに表示するための Java script です。[openBDプロジェクト](https://openbd.jp/)を利用させていただいています．
 
 ## サンプル
-index.html が利用の仕方になります．
-．
+index.html がサンプルになります（外部サイトにアクセスする関係上，サーバ（ローカルサーバでも可）にアップロードする必要があります）．
+
+また，以下がデモ・利用例になります．
+
+http://nlab.flnet.org/zekkai/zekkai-lib/
+
 ## 使い方
 
 本プログラムは jquery を利用していますので，jquery とともに blogbib.jsを読み込むようにhtmlを記述します．
@@ -35,8 +39,9 @@ var blogbib = new BlogBib({ amazon_account: "xxxxx",cover_mode: "amazon", width_
 
 オプションとしては以下の４つが利用できます．
 * amazon_account: amazon への広告用リンクを作成するときに利用するアカウント名です．指定しなくても問題ありません（広告用でない通常のリンクであれば作成できるため）．
-* cover_mode:書影（カバー画像）の表示元です．"amazon"を指定すると Amazon の物を使いますが，"db"もしくは「指定なし」の場合は[openBDプロジェクト](https://openbd.jp/)のものを使います．
+* cover_mode:書影（カバー画像）の表示元です．"amazon"を指定もしくは「指定なし」とすると Amazon の書影を使います．"db"の場合は[openBDプロジェクト](https://openbd.jp/)のものを使います．ただし，opendbの場合，書影が存在しない書籍に関してはグレーの画像になっているようなので注意が必要です．
 * width_cover:書影の表示サイズ（横幅）を指定します．
+* width_text:書誌情報の表示サイズ（横幅）を指定します．
 * width:全体の横幅を指定します．（高さは表示内容に応じて自動決定されます）
 
 ## できないこと（もしくはTODO）
@@ -46,7 +51,7 @@ var blogbib = new BlogBib({ amazon_account: "xxxxx",cover_mode: "amazon", width_
 
 ## 開発環境+言語
 
-Visual studio 2015 for Web + Type Script 1.7
+Visual studio 2017 + Type Script 1.7
 
 ## ライセンス
 
