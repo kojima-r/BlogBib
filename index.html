@@ -1,59 +1,63 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <title>Sample (blogbib.js)</title>
-    <style>
-        #content{
-            width:600px;
-        }
-        .blogbib {
-            border-style:solid;
-            border-width:2px;
-            width:604px;
-            display:inline-block;
-            background-color:#f0f0f0;
-            padding:0;
-        }
-        .blogbib table{
-            border-style: solid;
-            border-width: 2px;
-            display: inline-block;
-            background-color: #f0fff0;
-            margin:0;
-        }
-    </style>
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-    <script src="blogbib.js"></script>
+	<meta charset="utf-8" />
+	<title>Sample (blogbib.js)</title>
+	<style>
+		#content{
+			width:800px;
+		}
+		.blogbib {
+			border-style:solid;
+			border-width:2px;
+			width:804px;
+			display:inline-block;
+			background-color:#f0f0f0;
+			padding:0;
+		}
+		.blogbib table{
+			border-style: solid;
+			border-width: 2px;
+			display: inline-block;
+			background-color: #f0fff0;
+			margin:0;
+		}
+	</style>
+	<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+	<script src="blogbib.js"></script>
 
-    <script>
-        //var blogbib = new BlogBib({ amazon_account: "xxxxx",cover_mode: "amazon", width_cover: 170, width: 600});
-        function create(s) {
-            document.write('<div id="id' + s+'"></div>')
-            $.event.add(window, 'load', function(){
-                console.log("[lnk]")
-                blogbib.createLink(s, $("#id" + s));
-            });
-        }
+	<script>
+        var blogbib = new BlogBib({ amazon_account: "xxxxx", cover_mode: "amazon", width_cover: 170, width_text:630, width: 800});
+		function my_create(s) {
+			document.write('<div id="id' + s+'"></div>')
+			$.event.add(window, 'load', function(){
+				console.log("[lnk]")
+				blogbib.createLink(s, $("#id" + s));
+			});
+		}
 
 
-    </script>
+	</script>
 
 </head>
 <body>
-    <h1>Sample (blogbib.js)</h1>
-
-    <div id="content">
-        <p>blogbib.createLink("B071XYQFZB");</p>
-            <script>blogbib.createLink("B071XYQFZB");</script>
-        <p>blogbib.createLink("9784062199544");</p>
-            <script>blogbib.createLink("9784062199544");</script>
-    </div>
-    <div>
-        element
-        
-        <script>create("4167661349");</script>
-        
-   </div>
+	<h1>Sample (blogbib.js)</h1>
+	<div id="content">
+		<h2>
+		使い方１．AmazonのASINを指定して書影情報を取得．
+		</h2>
+		<p>
+        blogbib.createLink("B01MSLX31P");</p>
+		<script>blogbib.createLink("B01MSLX31P");</script>
+		<h2>
+		使い方２．ISBNを指定して書誌情報・書影情報を取得．
+		</h2>
+		<p>blogbib.createLink("9784062199544");</p>
+		<script>blogbib.createLink("9784062199544");</script>
+		<h2>
+		使い方３．自作のJavaScriptから動的に書誌情報・書影情報を配置．
+		</h2>
+		<script>my_create("4167661349");</script>
+	</div>
 </body>
 </html>
