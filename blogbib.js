@@ -2,13 +2,15 @@
 var BlogBib = (function () {
     function BlogBib(opt) {
         if (opt === void 0) { opt = {}; }
-        this.width_cover = 170;
-        this.width = 600;
+        this.width_cover = 150;
+        this.width_text = 300;
+        this.width = 450;
         this.endpoint = "http://api.openbd.jp/v1/";
         this.amazon_links = {};
         this.db_links_id = {};
-        this.cover_mode = "db";
+        this.cover_mode = "amazon";
         this.link_mode = "amazon";
+        this.amazon_link_mode = "cover";
         this.amazon_account = null;
         $.extend(this, opt);
     }
@@ -68,7 +70,6 @@ var BlogBib = (function () {
             data: args,
             success: function (msg) {
                 for (var i = 0; i < msg.length; i++) {
-                    console.log(msg[i]);
                     // creating author info
                     var author = msg[i]["summary"]["author"];
                     var pubdate = _this.convDate(msg[i]["summary"]["pubdate"]);
@@ -96,14 +97,21 @@ var BlogBib = (function () {
                     var book_url = _this.getAmazonURL(_this.toISBN10(isbn_list[i]));
                     var title = '<a href="' + book_url + '" target="_blank">' + msg[i]["summary"]["title"] + '</a>';
                     var isbn13 = msg[i]["onix"]["ProductIdentifier"]["IDValue"];
-                    var price_u = msg[i]["onix"]["ProductSupply"]["SupplyDetail"]["Price"][0]["CurrencyCode"];
-                    if (price_u == "JPY") {
-                        price_u = "円";
+                    var price_u = "";
+                    var price = "";
+                    try {
+                        price_u = msg[i]["onix"]["ProductSupply"]["SupplyDetail"]["Price"][0]["CurrencyCode"];
+                        if (price_u == "JPY") {
+                            price_u = "円";
+                        }
+                        else {
+                            price_u = " (" + price_u + ")";
+                        }
+                        price = msg[i]["onix"]["ProductSupply"]["SupplyDetail"]["Price"][0]["PriceAmount"];
                     }
-                    else {
-                        price_u = " (" + price_u + ")";
+                    catch (err) {
+                        console.log(err);
                     }
-                    var price = msg[i]["onix"]["ProductSupply"]["SupplyDetail"]["Price"][0]["PriceAmount"];
                     //var book_info = msg[i]["onix"]["CollateralDetail"]["TextContent"][0]["Text"];
                     var name = name_list[i];
                     var info = '<ul style="list-style-type: none;margin: 0px 0px 0px 10px;padding: 0px 0px 0px 0px;">' +
@@ -116,7 +124,11 @@ var BlogBib = (function () {
                         //"<li>ISBN-13：" + isbn13 + "</li>" +
                         book_info +
                         "</ul>";
-                    $("#" + name).append('<table border="0" width="' + _this.width + '"><tr><td width= "' + _this.width_cover + '" valign="top">' + cover + '</td><td valign="top">' + info + '</td></tr>');
+                    var text_head = '<table border="0" width="' + _this.width + '"><tr>';
+                    var text_foot = '</tr></table>';
+                    var text1 = '<td width= "' + _this.width_cover + '" valign="top">' + cover + '</td>';
+                    var text2 = '<td width= "' + _this.width_text + '" valign= "top"> ' + info + ' </td>';
+                    $("#" + name).append(text_head + text1 + text2 + text_foot);
                 }
             },
             error: function (req, sts, err) {
@@ -129,17 +141,25 @@ var BlogBib = (function () {
             $("#amazon_" + asin).append(this.amazon_links[asin]);
         }
     };
-    BlogBib.prototype.createLink = function (id) {
+    BlogBib.prototype.createLink = function (id, lnk) {
+        if (lnk === void 0) { lnk = null; }
         if (this.isASIN(id)) {
-            this.createAmazonLink(id);
+            this.createAmazonLink(id, lnk);
         }
         else {
-            this.createDBLink(id);
+            this.createDBLink(id, lnk);
         }
     };
-    BlogBib.prototype.createDBLink = function (isbn) {
+    BlogBib.prototype.createDBLink = function (isbn, element) {
+        if (element === void 0) { element = null; }
         this.db_links_id[isbn] = "db_" + isbn;
-        document.write('<div class="blogbib" id="' + "db_" + isbn + '"></div>');
+        var html_str = '<div class="blogbib" id="' + "db_" + isbn + '"></div>';
+        if (element == null) {
+            document.write(html_str);
+        }
+        else {
+            element.append(html_str);
+        }
     };
     BlogBib.prototype.getAmazonURL = function (asin) {
         if (this.amazon_account) {
@@ -149,10 +169,16 @@ var BlogBib = (function () {
             return "https://www.amazon.co.jp/dp/" + asin + "/ref=as_li_ss_tl?";
         }
     };
-    BlogBib.prototype.createAmazonURL = function (asin, text) {
+    BlogBib.prototype.createAmazonURL = function (asin, text, element) {
+        if (element === void 0) { element = null; }
         var link = this.getAmazonURL(asin);
         var html_str = '<a href="' + link + '" target="_blank">' + text + '</a>';
-        document.write(html_str);
+        if (element == null) {
+            document.write(html_str);
+        }
+        else {
+            element.append(html_str);
+        }
     };
     BlogBib.prototype.getAmazonLink = function (asin) {
         var opt = {
@@ -199,15 +225,33 @@ var BlogBib = (function () {
         }
         return html_str;
     };
-    BlogBib.prototype.createAmazonLink = function (asin) {
-        this.amazon_links[asin] = this.getAmazonLink(asin);
-        document.write('<div class="blogbib" id="amazon_' + asin + '"></div>');
+    BlogBib.prototype.createAmazonLink = function (asin, element) {
+        if (element === void 0) { element = null; }
+        var html_str = "";
+        if (this.amazon_link_mode == "cover") {
+            var text = this.getAmazonCover(asin);
+            html_str = '<div class="blogbib" id="amazon_' + asin + '">' + text + '</div>';
+        }
+        else {
+            this.amazon_links[asin] = this.getAmazonLink(asin);
+            html_str = '<div class="blogbib" id="amazon_' + asin + '"></div>';
+        }
+        if (element == null) {
+            document.write(html_str);
+        }
+        else {
+            element.append(html_str);
+        }
     };
     return BlogBib;
-})();
+}());
 var blogbib = new BlogBib();
-window.onload = function () {
-    blogbib.load_amazon();
-    blogbib.load_db();
-};
+$(window).ready(function () {
+    console.log("[ready]");
+    $.event.add(window, 'load', function () {
+        console.log("[Init]");
+        blogbib.load_amazon();
+        blogbib.load_db();
+    });
+});
 //# sourceMappingURL=blogbib.js.map

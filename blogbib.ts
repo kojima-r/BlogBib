@@ -8,14 +8,17 @@ class BlogBib {
     db_links_id: Object;
     cover_mode: string;
     link_mode: string;
-    width_cover: number=170;
-    width: number=600;
+    amazon_link_mode: string;
+    width_cover: number = 150;
+    width_text: number = 300;
+    width: number = 450;
     constructor(opt: Object = {}) {
         this.endpoint = "http://api.openbd.jp/v1/";
         this.amazon_links = {};
         this.db_links_id = {};
-        this.cover_mode = "db";
+        this.cover_mode = "amazon";
         this.link_mode = "amazon";
+        this.amazon_link_mode = "cover";
         this.amazon_account = null;
         $.extend(this, opt);
     }
@@ -31,7 +34,7 @@ class BlogBib {
         var y = date.substr(0, 4);
         var m = date.substr(4, 2);
         var d = date.substr(6, 2);
-        return y + "/" + m +"/"+ d;
+        return y + "/" + m + "/" + d;
     }
     toISBN10(isbn: string) {
         if (isbn.length > 10) {
@@ -71,43 +74,48 @@ class BlogBib {
             data: args,
             success: (msg) => {
                 for (var i = 0; i < msg.length; i++) {
-                    console.log(msg[i]);
 
                     // creating author info
                     var author = msg[i]["summary"]["author"];
                     var pubdate = this.convDate(msg[i]["summary"]["pubdate"]);
 
                     // creating cover info
-                    var cover:string;
+                    var cover: string;
                     if (this.cover_mode == "amazon") {
                         // ISBN-10 is used in Amazon URL
                         cover = this.getAmazonCover(this.toISBN10(isbn_list[i]));
-                    }else {
+                    } else {
                         cover = '<img src= "' + msg[i]["summary"]["cover"] + '" alt= "image" />'
                     }
-                    
+
                     // creating book info
                     var book_info = ""
                     var contents = msg[i]["onix"]["CollateralDetail"]["TextContent"];
                     if (contents) {
                         // all contents are contcatnated
-                        book_info+="<li>"
+                        book_info += "<li>"
                         for (var j = 0; j < contents.length; j++) {
                             book_info += "<p>" + contents[j]["Text"] + "</p>"
                         }
-                        book_info+="</li>"
+                        book_info += "</li>"
                     }
                     // URL & Title
                     var book_url = this.getAmazonURL(this.toISBN10(isbn_list[i]));
                     var title: string = '<a href="' + book_url + '" target="_blank">' + msg[i]["summary"]["title"] + '</a>'
                     var isbn13: string = msg[i]["onix"]["ProductIdentifier"]["IDValue"];
-                    var price_u: string = msg[i]["onix"]["ProductSupply"]["SupplyDetail"]["Price"][0]["CurrencyCode"];
-                    if (price_u == "JPY") {
-                        price_u = "円";
-                    } else {
-                        price_u = " ("+price_u + ")";
+                    var price_u: string="";
+                    var price: string =""
+                    try{
+                        price_u = msg[i]["onix"]["ProductSupply"]["SupplyDetail"]["Price"][0]["CurrencyCode"];
+                        if (price_u == "JPY") {
+                            price_u = "円";
+                        } else {
+                            price_u = " (" + price_u + ")";
+                        }
+                        price= msg[i]["onix"]["ProductSupply"]["SupplyDetail"]["Price"][0]["PriceAmount"];
+                    } catch (err) {
+                        console.log(err);
                     }
-                    var price: string = msg[i]["onix"]["ProductSupply"]["SupplyDetail"]["Price"][0]["PriceAmount"];
                     //var book_info = msg[i]["onix"]["CollateralDetail"]["TextContent"][0]["Text"];
                     var name = name_list[i];
                     var info = '<ul style="list-style-type: none;margin: 0px 0px 0px 10px;padding: 0px 0px 0px 0px;">' +
@@ -115,12 +123,16 @@ class BlogBib {
                         "<li>作者　：" + author + "</li>" +
                         "<li>出版社：" + msg[i]["summary"]["publisher"] + "</li>" +
                         "<li>出版日：" + pubdate + "</li>" +
-                        "<li>価格　：" + price + price_u+"</li>" +
+                        "<li>価格　：" + price + price_u + "</li>" +
                         //"<li>ISBN-10：" + this.toISBN10(isbn13) + "</li>" +
                         //"<li>ISBN-13：" + isbn13 + "</li>" +
                         book_info +
                         "</ul>";
-                    $("#" + name).append('<table border="0" width="' + this.width + '"><tr><td width= "' + this.width_cover+'" valign="top">' + cover + '</td><td valign="top">' + info + '</td></tr>');
+                    var text_head = '<table border="0" width="' + this.width + '"><tr>';
+                    var text_foot = '</tr></table>';
+                    var text1 = '<td width= "' + this.width_cover + '" valign="top">' + cover + '</td>'
+                    var text2 = '<td width= "' + this.width_text + '" valign= "top"> ' + info + ' </td>'
+                    $("#" + name).append(text_head + text1 + text2 + text_foot);
                 }
             },
             error: (req, sts, err) => {
@@ -133,16 +145,22 @@ class BlogBib {
             $("#amazon_" + asin).append(this.amazon_links[asin]);
         }
     }
-    createLink(id: string) {
+    createLink(id: string, lnk: any= null) {
         if (this.isASIN(id)) {
-            this.createAmazonLink(id);
+            this.createAmazonLink(id, lnk);
         } else {
-            this.createDBLink(id);
+            this.createDBLink(id, lnk);
         }
     }
-    createDBLink(isbn: string) {
+    createDBLink(isbn: string, element: any = null) {
         this.db_links_id[isbn] = "db_" + isbn;
-        document.write('<div class="blogbib" id="' + "db_" + isbn + '"></div>');
+        var html_str:string='<div class="blogbib" id="' + "db_" + isbn + '"></div>';
+        if (element == null) {
+            document.write(html_str);
+        } else {
+            element.append(html_str);
+        }
+        
     }
     getAmazonURL(asin: string) {
         if (this.amazon_account) {
@@ -151,10 +169,14 @@ class BlogBib {
             return "https://www.amazon.co.jp/dp/" + asin + "/ref=as_li_ss_tl?";
         }
     }
-    createAmazonURL(asin: string, text: string) {
+    createAmazonURL(asin: string, text: string, element: any=null) {
         var link = this.getAmazonURL(asin);
         var html_str: string = '<a href="' + link + '" target="_blank">' + text + '</a>'
-        document.write(html_str);
+        if (element == null) {
+            document.write(html_str);
+        } else {
+            element.append(html_str);
+        }
     }
     getAmazonLink(asin: string) {
         var opt = {
@@ -173,9 +195,9 @@ class BlogBib {
             asins: asin
         };
         //if (this.amazon_account) {
-            $.extend(opt, {
-                t: this.amazon_account
-            })
+        $.extend(opt, {
+            t: this.amazon_account
+        })
         //}
         var args = [];
         for (var key in opt) {
@@ -197,19 +219,40 @@ class BlogBib {
                 + '<img border= "0" src= "//ws-fe.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=' + asin + '&Format=_SL250_&ID=AsinImage&MarketPlace=JP&ServiceVersion=20070822&WS=1" >'
                 + '</a>'
                 + '<img src= "https://ir-jp.amazon-adsystem.com/e/ir?l=li3&o=9&a=' + asin + '" width= "1" height= "1" border= "0" alt= "" style= "border:none !important; margin:0px !important;" />'
-        
+
         }
         return html_str;
     }
-    createAmazonLink(asin: string) {
-        this.amazon_links[asin] = this.getAmazonLink(asin);
-        document.write('<div class="blogbib" id="amazon_' + asin + '"></div>');
+    createAmazonLink(asin: string, element: any = null) {
+        var html_str: string="";
+        if (this.amazon_link_mode == "cover") {
+            var text=this.getAmazonCover(asin);
+            html_str='<div class="blogbib" id="amazon_' + asin + '">' + text+'</div>';
+        } else {
+            this.amazon_links[asin] = this.getAmazonLink(asin);
+            html_str ='<div class="blogbib" id="amazon_' + asin + '"></div>';
+        }
+        
+
+        if (element == null) {
+            document.write(html_str);
+        } else {
+            element.append(html_str);
+        }
     }
 
 }
 var blogbib = new BlogBib();
-window.onload = () => {
-    blogbib.load_amazon();
-    blogbib.load_db();
-};
+interface JQueryStatic {
+    event: any;
+}
+$(window).ready(() => {
+    console.log("[ready]")
+    $.event.add(window, 'load', () => {
+        console.log("[Init]")
+
+        blogbib.load_amazon();
+        blogbib.load_db();
+    });
+});
 

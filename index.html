@@ -10,28 +10,50 @@
         .blogbib {
             border-style:solid;
             border-width:2px;
-            width:600px;
+            width:604px;
             display:inline-block;
             background-color:#f0f0f0;
+            padding:0;
+        }
+        .blogbib table{
+            border-style: solid;
+            border-width: 2px;
+            display: inline-block;
+            background-color: #f0fff0;
+            margin:0;
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="blogbib.js"></script>
+
     <script>
         //var blogbib = new BlogBib({ amazon_account: "xxxxx",cover_mode: "amazon", width_cover: 170, width: 600});
+        function create(s) {
+            document.write('<div id="id' + s+'"></div>')
+            $.event.add(window, 'load', function(){
+                console.log("[lnk]")
+                blogbib.createLink(s, $("#id" + s));
+            });
+        }
+
+
     </script>
+
 </head>
 <body>
     <h1>Sample (blogbib.js)</h1>
 
     <div id="content">
-        <p>blogbib.createLink("4103503610");</p>
-            <script>blogbib.createLink("4103503610");</script>
+        <p>blogbib.createLink("B071XYQFZB");</p>
+            <script>blogbib.createLink("B071XYQFZB");</script>
         <p>blogbib.createLink("9784062199544");</p>
             <script>blogbib.createLink("9784062199544");</script>
-        <p>blogbib.createLink("4048922939");</p>
-            <script>blogbib.createLink("4048922939");</script>
-</div>
-
+    </div>
+    <div>
+        element
+        
+        <script>create("4167661349");</script>
+        
+   </div>
 </body>
 </html>
